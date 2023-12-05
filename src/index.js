@@ -5,6 +5,9 @@ const path = require("path");
 const app = express();
 const port = 3000;
 
+// đường dẫn ảnh http://localhost:3000/img/logo.png
+app.use(express.static(path.join(__dirname, "public")));
+
 // HTTP Logger
 app.use(morgan("combined"));
 
