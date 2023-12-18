@@ -27,6 +27,26 @@ app.use(express.json());
 // override with POST having ?_method=DELETE
 app.use(methodOverride("_method"));
 
+// Khái niệm middleware?
+app.get(
+  "/middleware",
+  function (req, res, next) {
+    if (["vethuong", "vevip"].includes(req.query.ve)) {
+      req.face = "///";
+      return next();
+    }
+    res.status(403).json({
+      message: "Access denied",
+    });
+  },
+  function (req, res, next) {
+    res.json({
+      message: "Successfully!",
+      face: req.face
+    });
+  }
+);
+
 // HTTP Logger
 // app.use(morgan("combined"));
 
