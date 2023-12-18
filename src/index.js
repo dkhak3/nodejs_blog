@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const { engine } = require("express-handlebars");
 const methodOverride = require("method-override");
+const SortMiddleware = require("./app/middleware/SortMiddleware");
+
 const path = require("path");
 const app = express();
 const port = 3000;
@@ -27,6 +29,9 @@ app.use(express.json());
 // override with POST having ?_method=DELETE
 app.use(methodOverride("_method"));
 
+// Custom middleware
+app.use(SortMiddleware);
+
 // Khái niệm middleware?
 app.get(
   "/middleware",
@@ -42,7 +47,7 @@ app.get(
   function (req, res, next) {
     res.json({
       message: "Successfully!",
-      face: req.face
+      face: req.face,
     });
   }
 );
@@ -57,6 +62,28 @@ app.engine(
     extname: ".hbs",
     helpers: {
       sum: (a, b) => a + b,
+      sortable: (filed, sort) => {
+        const sortType = filed === sort.column ? sort.type : "default"
+        const icons = {
+          default: "fa-solid fa-sort",
+          asc: "fa-solid fa-arrow-up-wide-short",
+          desc: "fa-solid fa-arrow-down-wide-short",
+        };
+        const types = {
+          default: "desc",
+          asc: "desc",
+          desc: "asc",
+        };
+
+        const icon = icons[sortType];
+        const type = types[sortType];
+
+        return `
+        <a href="?_sort&column=${filed}&type=${type}">
+          <i class="${icon}"></i>
+        </a>
+        `;
+      },
     },
   })
 );
