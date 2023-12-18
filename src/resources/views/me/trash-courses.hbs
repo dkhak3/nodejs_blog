@@ -1,10 +1,25 @@
-<div class="mt-4">
+<form method="post" action="/courses/handle-form-actions" name="container-form" class="mt-4">
   <h3>Khóa học đã xóa</h3>
   <a href="/me/stored/courses">Quay lại danh sách khóa học</a>
+
+  <div class="mt-4 d-flex">
+    <select required id="action" name="action" class="form-select" style="width: 200px;margin-right: 25px;">
+      <option selected value="">Chọn hành động</option>
+      <option value="force">Xóa vĩnh viễn</option>
+      <option value="restore">Khôi phục</option>
+    </select>
+
+    <button class="btn btn-primary check-all-submit-btn" disabled>Thực hiện</button>
+  </div>
   
   <table class="table table-bordered mt-4">
     <thead>
       <tr>
+        <th scope="col">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="checkbox-all">
+          </div>
+        </th>
         <th scope="col">#</th>
         <th scope="col">Tên khóa học</th>
         <th scope="col">Trình độ</th>
@@ -16,6 +31,11 @@
       {{#each courses}}
 
         <tr>
+          <th>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="" name="courseIds[]" value="{{this._id}}">
+            </div>
+          </th>
           <th scope="row">{{sum @index 1}}</th>
           <td>{{this.name}}</td>
           <td>{{this.level}}</td>
@@ -43,7 +63,7 @@
 
     </tbody>
   </table>
-</div>
+</form>
 
 <!-- Modal Confirm delete course -->
 <div
@@ -90,6 +110,10 @@
     const deleteForm = document.forms["delete-course-form"];
     const restoreForm = document.forms["restore-course-form"];
     const btnRestores = document.querySelectorAll(".btn-restore");
+    const checkboxAll = document.getElementById("checkbox-all");
+    const courseItemCheckbox = document.getElementsByName("courseIds[]")
+    const checkAllSubmitBtn = document.querySelector(".check-all-submit-btn");
+
     
     let courseId;
 
@@ -116,6 +140,36 @@
           restoreForm.submit();
         })
       });
+
+      let totalCheckboxItems = 0;
+      // checkboxAll
+      checkboxAll.addEventListener("change", (e) => {
+        const isCheckedAll = e.target.checked;
+        isCheckedAll ? totalCheckboxItems = courseItemCheckbox.length : totalCheckboxItems = 0
+        courseItemCheckbox.forEach(item => {
+          item.checked = isCheckedAll
+        });
+        renderCheckAllSubmitBtn();
+      });
+
+      // checkbox items
+      courseItemCheckbox.forEach(course => {
+        course.addEventListener("change", (e) => {
+          e.target.checked ? totalCheckboxItems++ : totalCheckboxItems--
+          const isCheckedAll = courseItemCheckbox.length === totalCheckboxItems;
+          checkboxAll.checked = isCheckedAll
+          renderCheckAllSubmitBtn();
+        });
+      });
+
+      //re-render check all submit btn
+      function renderCheckAllSubmitBtn() {
+        if (totalCheckboxItems > 0) {
+          checkAllSubmitBtn.removeAttribute("disabled")
+        } else {
+          checkAllSubmitBtn.setAttribute("disabled", "")
+        }
+      };
     }
   })
 </script>
